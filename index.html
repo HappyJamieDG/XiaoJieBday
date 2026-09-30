@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>婕29岁生日猫窝</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- 💥 核心修正：修复 Supabase SDK 正确的 CDN 链接 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="workshop-container">
+
+  <!-- ==================== 页面 1：DIY 创作画板 ==================== -->
+  <div id="page1" class="page-section active">
+    
+    <header class="header">
+      <h1>欢迎来到婕29岁生日猫窝</h1>
+      <p>创建自己的猫咪形象吧。</p>
+      <button type="button" class="skip-creation-btn thunder-neon-btn" onclick="togglePage('page2')"><span class="thunder-neon-text">我是黄晓婕</span></button>
+    </header>
+
+    <div class="diy-main">
+      <div class="canvas-section">
+        <div class="canvas-card-wrapper">
+          <div class="mode-switch-box">
+            <button class="mode-btn active" onclick="useTemplateCat()">🐱 基础小猫模板</button>
+            <button class="mode-btn" onclick="useBlankCanvas()">🎨 完全自制</button>
+          </div>
+
+          <div class="cat-head-card">
+            <canvas id="catCanvas" width="300" height="300"></canvas>
+          </div>
+
+          <div class="hat-control-row" id="hatControlRow" style="display: none;">
+            <span>🎩 大小:</span>
+            <input type="range" id="hatScaleRange" min="0.5" max="2.0" step="0.05" value="1.0">
+            <button class="action-sub-btn" onclick="resetHatTransform()">重置位置</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tools-section">
+        <div class="tool-group">
+          <label>👑 选择角色头饰（可拖拽/缩放）：</label>
+          <div class="carousel-row">
+            <button class="arrow-btn" onclick="prevHatPage()">◄</button>
+            <div class="options-container" id="hatOptionsBox"></div>
+            <button class="arrow-btn" onclick="nextHatPage()">►</button>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <label>🎨 手绘与毛发填色工具箱：</label>
+          <div class="brush-type-box">
+            <button id="moveToolBtn" class="brush-btn active" onclick="setBrushTool('move', this)">🖐️ 移动/手势</button>
+            <button class="brush-btn" onclick="setBrushTool('pencil', this)">✏️ 铅笔</button>
+            <button class="brush-btn" onclick="setBrushTool('pen', this)">🖊️ 钢笔</button>
+            <button class="brush-btn" onclick="setBrushTool('brush', this)">🖌️ 毛笔</button>
+            <button class="brush-btn" onclick="setBrushTool('crayon', this)">🖍️ 蜡笔</button>
+            <button class="brush-btn eraser" onclick="setBrushTool('eraser', this)">🧹 橡皮</button>
+          </div>
+
+          <div class="brush-style-row">
+            <label class="color-picker-label">颜色：<input type="color" id="coatColor" value="#a24bcf"></label>
+            <label class="range-label">粗细：<input type="range" id="brushSize" min="1" max="25" value="4"></label>
+            <div class="action-group-btns">
+              <button class="action-sub-btn" onclick="undoDrawing()">↩️ 撤销</button>
+              <button class="action-sub-btn" onclick="redoDrawing()">↪️ 重做</button>
+              <button class="action-sub-btn" onclick="clearHandDrawing()">↺ 重置</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-form">
+      <h3>制作猫窝身份证</h3>
+      <div class="input-row">
+        <div class="input-group">
+          <label for="fanName">昵称：</label>
+          <input type="text" id="fanName" placeholder="请输入你的昵称">
+        </div>
+        <div class="input-group">
+          <label for="catOrigin">出生地：</label>
+          <input type="text" id="catOrigin" placeholder="请输入猫咪出生地">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="blessing">给婕的29岁生日祝福（可以写文字或录入语音）：</label>
+        <textarea id="blessing" placeholder="写下对婕的祝福..."></textarea>
+        
+        <div class="voice-control-box">
+          <button type="button" id="recordBtn" class="voice-btn" onclick="toggleRecord()">🎙️ 点击开始录音</button>
+          <button type="button" id="playBtn" class="voice-btn secondary-btn" style="display: none;" onclick="playVoice()">▶️ 试听语音</button>
+          <button type="button" id="reRecordBtn" class="voice-btn danger-btn" style="display: none;" onclick="reRecordVoice()">🔄 重新录制</button>
+          <span id="voiceStatus" class="voice-status">未录音</span>
+        </div>
+      </div>
+
+      <button id="submitBtn" class="primary-btn" onclick="submitToSupabase()">进入猫窝</button>
+    </div>
+
+    <footer class="creation-footer">by 阿 7 &amp; 冬瓜</footer>
+
+  </div>
+
+  <!-- ==================== 页面 2：婕的抓猫机 ==================== -->
+  <div id="page2" class="page-section" style="display: none;">
+    
+    <header class="header">
+      <h1>🏠 婕的抓猫机</h1>
+      <p>控制抓爪，抓取小猫吧</p>
+      <button type="button" class="skip-creation-btn" onclick="togglePage('page1')">← 返回制作小猫</button>
+    </header>
+
+    <div class="arcade-machine">
+      
+      <div class="arcade-roof">
+        <div class="neon-light-row">
+          <span class="light dot-pink"></span>
+          <span class="light dot-yellow"></span>
+          <span class="light dot-purple"></span>
+          <span class="light dot-pink"></span>
+          <span class="light dot-yellow"></span>
+        </div>
+        <div class="arcade-title">✨ CAT CLAW MACHINE ✨</div>
+        <div class="top-action-bar">
+          <button class="arcade-top-btn shake-btn" onclick="shakeCatMachine()">📳 摇摇猫窝</button>
+          <button class="arcade-top-btn refresh-btn" onclick="refreshCatBatch()">🔄 换一批（最多20颗）</button>
+        </div>
+      </div>
+
+      <p id="houseStatus" class="house-status" role="status" aria-live="polite"></p>
+      <div class="arcade-glass-cabin" id="machineGlass">
+        <div class="glass-glare"></div>
+        
+        <div class="rail-top"></div>
+        <div class="claw-line" id="clawLine"></div>
+        
+        <div class="claw-head" id="claw">
+          <img class="claw-character claw-character-down" src="https://i.ibb.co/rfHfxThF/down.png" alt="" draggable="false">
+          <img class="claw-character claw-character-up" src="https://i.ibb.co/Fb6bV41r/up.png" alt="" draggable="false">
+        </div>
+
+        <div class="stacked-cats-zone" id="stackedCats"></div>
+      </div>
+
+      <div class="arcade-deck">
+        <div class="chute-only-row">
+          <div class="real-out-chute">
+            <span class="chute-label">PRIZE 出货口</span>
+            <div id="caughtCatSlot" class="prize-basket"></div>
+          </div>
+        </div>
+
+        <div class="joystick-control-panel">
+          <button class="arcade-pad-btn" onclick="moveClaw('left')">◄ 往左移</button>
+          <button class="arcade-pad-btn grab-primary-btn" onclick="triggerGrab()">🎯 抓取猫咪</button>
+          <button class="arcade-pad-btn" onclick="moveClaw('right')">往右移 ▶</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="collection-entry">
+      <button type="button" class="primary-btn" onclick="openCollection()">📸 大合照（<span id="collectionCount">0</span>） →</button>
+      <button class="action-sub-btn remake-btn" onclick="remakeMyCat()">✨ 重做我的猫</button>
+    </div>
+  </div>
+
+  <div id="page3" class="page-section" style="display: none;">
+    <header class="header">
+      <h1>📸 猫咪球大合照</h1>
+      <p>抓到的小猫都来集合啦！点击任意一颗，打开它的生日祝福。</p>
+      <button type="button" class="skip-creation-btn" onclick="togglePage('page2', false)">← 返回抓猫机</button>
+    </header>
+    <div class="album-section">
+      <div class="album-header">
+        <h3>📖 已解锁的猫窝图鉴 (<span id="unlockedCount">0</span>)</h3>
+      </div>
+      <div class="album-grid" id="albumGrid">
+        <p class="empty-tip">还没有解锁猫咪哦，快控制抓爪抓一只吧！</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ==================== 身份证弹窗 ==================== -->
+<div class="modal-overlay" id="cardModal" style="display: none;">
+  <div class="card-modal-content">
+    <button class="close-modal-btn" onclick="closeModal()">✖</button>
+    
+    <div class="id-card-header">
+      <span>🐱 猫窝身份证</span>
+      <span class="card-index-tag" id="modalCatIndex">猫窝第 -- 只猫咪</span>
+    </div>
+
+    <div class="id-card-body">
+      <div class="id-card-photo-box">
+        <img id="modalCatImg" src="" alt="猫咪形象">
+      </div>
+      <div class="id-card-info">
+        <p><strong>昵称：</strong> <span id="modalFanName">--</span></p>
+        <p><strong>出生地：</strong> <span id="modalCatOrigin">--</span></p>
+        <div class="blessing-box">
+          <p><strong>生日祝福：</strong></p>
+          <p id="modalBlessingText" class="blessing-text">祝福内容...</p>
+        </div>
+        <div id="modalVoicePlayerBox" style="display: none; margin-top: 10px; text-align: center;">
+          <button class="primary-btn voice-play-modal-btn" onclick="playModalVoice()">🔊 点击播放语音祝福</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 14px;">
+      <button class="action-sub-btn" style="background: #f3d5ff; color: #7b2cbf; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 12px; cursor: pointer;" onclick="putCatBackToMachine()">📥 把这只猫放回抓猫机</button>
+      <button class="primary-btn modal-save-btn" style="margin-top: 0;" onclick="closeModal()">我知道啦</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
